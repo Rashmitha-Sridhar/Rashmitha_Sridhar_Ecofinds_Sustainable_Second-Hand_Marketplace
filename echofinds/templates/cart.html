@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EcoFinds - Cart</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+            <header class="site-nav">
+                <div class="container">
+                    <div class="brand"><img src="{{ url_for('static', filename='logo.jpg') }}" alt="logo">EcoFinds</div>
+                    <div class="nav-actions">
+                        <form method="GET" action="/products" class="search">
+                            <input name="q" placeholder="Search products" value="{{ q if q else '' }}">
+                            <select name="category">
+                                <option value="">All categories</option>
+                                {% if categories %}
+                                    {% for c in categories %}
+                                        <option value="{{ c }}" {% if c==category %}selected{% endif %}>{{ c }}</option>
+                                    {% endfor %}
+                                {% endif %}
+                            </select>
+                            <button class="btn" type="submit">Search</button>
+                        </form>
+                        <a class="nav-link" href="/products">Continue Shopping</a>
+                        {% if session.get('user_id') %}
+                            <a class="nav-link" href="/previous_purchases">Orders</a>
+                        {% endif %}
+                        {% if mine and session.get('user_id') %}
+                            <a class="nav-link" href="/add_product">Add Product</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </header>
+
+    <main class="container">
+        <h2>Your Cart</h2>
+        {% if products %}
+                    <div class="cart-list">
+                        {% for p in products %}
+                            <div class="cart-item">
+                                <div class="thumb">
+                                    {% if p.image_url %}
+                                        <img src="{{ url_for('static', filename='uploads/' ~ p.image_url) }}" alt="{{ p.title }}">
+                                    {% else %}
+                                        <img src="/static/placeholder.png" alt="{{ p.title }}">
+                                    {% endif %}
+                                </div>
+                                <div style="flex:1">
+                                    <div class="product-title">{{ p.title }}</div>
+                                    <div class="product-meta">₹{{ p.price }} x {{ p.qty }} = ₹{{ (p.price|float) * p.qty }}</div>
+                                </div>
+                                <div>
+                                    <form action="/remove_from_cart/{{ p.id }}" method="post">
+                                        <button class="btn ghost" type="submit">Remove one</button>
+                                    </form>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="cart-summary">
+                        <div>Total items: {{ products|length }}</div>
+                        <div>
+                            <form method="post" action="/checkout">
+                                <button class="btn" type="submit">Proceed to Checkout</button>
+                            </form>
+                        </div>
+                    </div>
+        {% else %}
+            <p>Your cart is empty.</p>
+        {% endif %}
+    </main>
+</body>
+</html>

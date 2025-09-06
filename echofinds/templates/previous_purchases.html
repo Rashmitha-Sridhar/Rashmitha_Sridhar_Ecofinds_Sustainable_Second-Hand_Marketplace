@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>EcoFinds - Previous Purchases</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+  <header class="site-nav">
+    <div class="container">
+  <div class="brand"><img src="{{ url_for('static', filename='logo.jpg') }}" alt="logo">EcoFinds</div>
+  <div class="nav-actions">
+        <form method="GET" action="/products" class="search">
+          <input name="q" placeholder="Search products" value="{{ q if q else '' }}">
+          <select name="category">
+            <option value="">All categories</option>
+            {% if categories %}
+              {% for c in categories %}
+                <option value="{{ c }}" {% if c==category %}selected{% endif %}>{{ c }}</option>
+              {% endfor %}
+            {% endif %}
+          </select>
+          <button class="btn" type="submit">Search</button>
+        </form>
+        {% if session.get('user_id') %}
+          <a class="nav-link" href="/cart">Cart ({{ session.get('cart')|length if session.get('cart') else 0 }})</a>
+          <a class="nav-link" href="/previous_purchases">Orders</a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+  <main class="container">
+    <h2>Your previous purchases</h2>
+    {% if orders %}
+      {% for o in orders %}
+        <div class="card" style="margin-bottom:.75rem;padding:1rem">
+          <div>Purchased at: {{ o.timestamp }}</div>
+          <div style="margin-top:.5rem">
+            {# prefer backend-provided 'products' but fall back to older 'items' key for compatibility #}
+            {% set prods = o.products if o.products is defined else (o.items if o.items is defined else []) %}
+            {% if prods %}
+              <div class="product-grid">
+                {% for p in prods %}
+                  <div class="product-card">
+                    <div class="product-media">
+                      {% if p.image_url %}
+                        <img src="{{ url_for('static', filename='uploads/' ~ p.image_url) }}" alt="{{ p.title }}">
+                      {% else %}
+                        <img src="/static/placeholder.png" alt="{{ p.title }}">
+                      {% endif %}
+                    </div>
+                    <div class="product-title">{{ p.title }}</div>
+                    <div class="product-meta">₹{{ p.price }}</div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <p>No items in this order.</p>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p>You have no previous purchases.</p>
+    {% endif %}
+  </main>
+</body>
+</html>

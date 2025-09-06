@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EcoFinds - Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+        <header class="site-nav">
+            <div class="container">
+                <div class="brand"><img src="{{ url_for('static', filename='logo.jpg') }}" alt="logo">EcoFinds</div>
+                    <div class="nav-actions">
+                    <form method="GET" action="/products" class="search">
+                        <input name="q" placeholder="Search products" value="{{ q if q else '' }}">
+                        <select name="category">
+                            <option value="">All categories</option>
+                            {% if categories %}
+                                {% for c in categories %}
+                                    <option value="{{ c }}" {% if c==category %}selected{% endif %}>{{ c }}</option>
+                                {% endfor %}
+                            {% endif %}
+                        </select>
+                        <button class="btn" type="submit">Search</button>
+                    </form>
+                    <div class="chip"><a href="{{ url_for('profile') }}">{{ user.username if user else 'User' }}</a></div>
+                    <a class="nav-link" href="/cart">Cart ({{ session.get('cart')|length if session.get('cart') else 0 }})</a>
+                    {% if session.get('user_id') %}
+                        <a class="nav-link" href="/previous_purchases">Orders</a>
+                    {% endif %}
+                    {% if mine and session.get('user_id') %}
+                        <a class="nav-link" href="/add_product">Add Product</a>
+                    {% endif %}
+                    <a class="nav-link" href="/logout">Logout</a>
+                </div>
+            </div>
+        </header>
+
+    <main class="container">
+        <div class="profile-head">
+            <div class="profile-avatar">
+                {% if user and user.profile_image %}
+                    <img src="{{ url_for('static', filename='uploads/' ~ user.profile_image) }}?v={{ user.profile_image }}" alt="avatar" style="width:64px;height:64px;border-radius:12px;object-fit:cover">
+                {% endif %}
+            </div>
+                    <div>
+                        <h3>{{ user.username if user else 'User' }}</h3>
+                        <div class="tabs">
+                            <a class="tab" href="/dashboard">Overview</a>
+                            <a class="tab" href="/my_listings">My Listings</a>
+                        </div>
+                        {% if mine and session.get('user_id') %}
+                            <div style="margin-top:.5rem"><a class="btn" href="/add_product">+ Add Product</a></div>
+                        {% endif %}
+                    </div>
+        </div>
+
+        <section>
+            <h3>All Products</h3>
+            {% if products %}
+                <div class="product-grid">
+                    {% for p in products %}
+                                    <article class="product-card">
+                                        <div class="product-media">
+                                            {% if p.image_url %}
+                                                <img src="{{ url_for('static', filename='uploads/' ~ p.image_url) }}" alt="{{ p.title }}">
+                                            {% else %}
+                                                <img src="/static/placeholder.png" alt="{{ p.title }}">
+                                            {% endif %}
+                                        </div>
+                            <div>
+                                <div class="product-title">{{ p.title }}</div>
+                                <div class="product-meta">{{ p.description }}</div>
+                                <div class="product-meta">Category: {{ p.category }}</div>
+                                <div class="product-meta">Price: ₹{{ p.price }}</div>
+                            </div>
+                            <div class="product-actions">
+                                <form action="/add_to_cart" method="post">
+                                    <input type="hidden" name="product_id" value="{{ p.id }}" />
+                                    <button class="btn" type="submit">Add to cart</button>
+                                </form>
+                                {% if session.get('user_id') and session.get('user_id') == p.user_id %}
+                                    <form action="/delete_product/{{ p.id }}" method="post">
+                                        <button class="btn danger" type="submit">Delete</button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>No products to show.</p>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>

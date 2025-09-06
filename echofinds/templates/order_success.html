@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Order Successful</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+  <header class="site-nav">
+    <div class="container">
+      <div class="brand"><img src="{{ url_for('static', filename='logo.jpg') }}" alt="logo">EcoFinds</div>
+      <div class="nav-actions">
+        <a class="nav-link" href="/products">Continue Shopping</a>
+        <a class="nav-link" href="/dashboard">Dashboard</a>
+        {% if session.get('user_id') %}
+          <a class="nav-link" href="/previous_purchases">Orders</a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+  <main class="container">
+    <div class="auth-card">
+      <h2>Order Successful</h2>
+      <p>Your order has been placed successfully.</p>
+      <h3>Order details</h3>
+      {% if items %}
+        <ul>
+          {% for p in items %}
+            <li>{{ p.title }} - ₹{{ p.price }}</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>No items found for this order.</p>
+      {% endif %}
+      <div style="margin-top:1rem">
+        <a class="btn" href="/products">Continue shopping</a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+        <title>EcoFinds - Products</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    </head>
+    <body>
+        <header class="site-nav">
+            <div class="container">
+                <div class="brand"><img src="{{ url_for('static', filename='logo.jpg') }}" alt="logo">EcoFinds</div>
+                                        <div class="nav-actions">
+                                                                                                                <form method="GET" action="/products" class="search">
+                                                                                                                                                                    <input name="q" placeholder="Search products" value="{{ q if q else '' }}">
+                                                                                                                                                                    <select name="category">
+                                                                                                                                                                        <option value="">All categories</option>
+                                                                                                                                                                        {% if categories %}
+                                                                                                                                                                            {% for c in categories %}
+                                                                                                                                                                                <option value="{{ c }}" {% if c==category %}selected{% endif %}>{{ c }}</option>
+                                                                                                                                                                            {% endfor %}
+                                                                                                                                                                        {% endif %}
+                                                                                                                                                                    </select>
+                                                                                                                                                                    <button class="btn" type="submit">Search</button>
+                                                                                                                                                                </form>
+                                                                        <a class="nav-link" href="/cart">Cart ({{ session.get('cart')|length if session.get('cart') else 0 }})</a>
+                                                                        <a class="nav-link" href="/dashboard">Dashboard</a>
+                                                                        {% if session.get('user_id') %}
+                                                                            <a class="nav-link" href="/previous_purchases">Orders</a>
+                                                                        {% endif %}
+                                    {% if mine %}
+                                        {% if session.get('user_id') %}
+                                            <a class="nav-link" href="/add_product">Add Product</a>
+                                        {% endif %}
+                                    {% endif %}
+                                                                </div>
+            </div>
+        </header>
+
+        <main class="container">
+                    <section class="hero">
+                    <div class="hero-text">
+                    <h2>Echo Finds Sustainable second hand marketplace</h2>
+                    <p class="product-meta">.</p>
+                </div>
+                <img src="{{ url_for('static', filename='banner.jpeg') }}" alt="banner">
+            </section>
+
+                    <section class="product-list">
+                {% if products %}
+                            <div class="product-grid">
+                        {% for p in products %}
+                            <article class="product-card">
+                                            <div class="product-media">
+                                                {% if p.image_url %}
+                                                    <img src="{{ url_for('static', filename='uploads/' ~ p.image_url) }}" alt="{{ p.title }}">
+                                                {% else %}
+                                                    <img src="/static/placeholder.png" alt="{{ p.title }}">
+                                                {% endif %}
+                                            </div>
+                                <div>
+                                    <div class="product-title">{{ p.title }}</div>
+                                    <div class="product-meta">₹{{ p.price }}</div>
+                                </div>
+                                <div class="product-actions">
+                                    <form action="/add_to_cart" method="post">
+                                        <input type="hidden" name="product_id" value="{{ p.id }}">
+                                        <button class="btn" type="submit">Add to cart</button>
+                                    </form>
+                                                    <a class="btn ghost" href="/products/{{ p.id }}">View</a>
+                                                    {% if session.get('user_id') and session.get('user_id') == p.user_id %}
+                                                        <a class="btn ghost" href="/edit_product/{{ p.id }}">Edit</a>
+                                                    {% endif %}
+                                </div>
+                            </article>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p>No products yet.</p>
+                {% endif %}
+            </section>
+        </main>
+    </body>
+    </html>
